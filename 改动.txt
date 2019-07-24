@@ -1,0 +1,18 @@
+ 1.改正GPS_SAVE_CMM发送函数中strlen的对象写错的问题
+    //Uart1_send_str((u8*)GPS_SAVE_CMM,strlen((const char *)GPS_230400));
+      Uart1_send_str((u8*)GPS_SAVE_CMM,strlen((const char *)GPS_SAVE_CMM));
+
+
+
+2.修复由于误操作把pos表头代码注释掉导致的无表头的问题
+
+	  if(pos_first_flag==1)
+	 {
+	 pos_first_flag=0;
+	 sprintf((char *)Write_Buff_pos,"%s\n",pos_item);
+	  SD_Res_STA=f_open(ftemp_pos, (const TCHAR*)Pos_Point_File_Name, FA_OPEN_ALWAYS | FA_WRITE); 	//打开文件  		
+	  SD_Res_STA=f_lseek(ftemp_pos,ftemp_pos ->fsize); //移动指针到结尾
+		SD_Res_STA = f_write(ftemp_pos,Write_Buff_pos,strlen((char *)Write_Buff_pos),&br);			 //写入文件
+	  SD_Res_STA=f_close(ftemp_pos);   
+	     
+	 }
