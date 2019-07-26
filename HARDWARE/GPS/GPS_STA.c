@@ -72,7 +72,7 @@ const u8 *GPS_REST_CMM           =  "FRESET\r\n" ;                //GPSª÷∏¥≥…≥ˆ≥
 const u8 *GPS_TIME_CMM           =  "GPZDA COM1 1\r\n"   ;  //GPS≈‰÷√ ‰≥ˆGPS ±º‰ ˝æ›
 const u8 *GPS_UNLOGALL_CMM       =  "UNLOG COM1\r\n"   ;  //GPS≈‰÷√πÿ±’À˘”–¥Æø⁄¥Ú”° ‰≥ˆ
 const u8 *GPS_SAVE_CMM           =  "saveconfig\r\n"   ;  //±£¥ÊGPS≈‰÷√
-const u8 *GPS_EVENT_CONFIG           =  "CONFIG EVENT ENABLE POSITIVE 10\r\n";
+const u8 *GPS_EVENT_CONFIG           =  "CONFIG EVENT ENABLE NEGATIVE 10\r\n";
 const u8 *GPS_EVENT_ASCII_RECORD           =  "LOG EVENTMARKA ONCHANGED\r\n" ;  //
   //
 

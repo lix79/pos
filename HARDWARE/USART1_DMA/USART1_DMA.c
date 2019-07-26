@@ -129,7 +129,7 @@ void USART2_IRQHandler(void)   //EventÊÂ¼ş
 		if(zhengti_flag==1)
 		{
 		  zhengti_cnt++;
-			 if(zhengti_cnt==4)
+			 if(zhengti_cnt==8)
 				 {
 			    gps_write_data_flag=1;
 					 zhengti_cnt=0;
