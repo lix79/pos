@@ -110,12 +110,21 @@ void USART1_IRQHandler(void)
  }
 }
 
- char gps_shuzu[200];
+typedef enum 
+{
+	initial_state,
+	got_hash,
+	got_asterisk
+}Prase_status;
+
+ char gps_shuzu[EVENT_BUF_LEN];
  char *gps_timea_buff=gps_shuzu;
 unsigned int data_gps_cnt=0;
 unsigned char gps_write_data_flag=0;
 unsigned char zhengti_cnt=0;
 unsigned char zhengti_flag=0;
+Prase_status receive_flag = initial_state;
+
 void USART2_IRQHandler(void)   //Event事件
 {
 	unsigned char com_data =0;
@@ -123,18 +132,34 @@ void USART2_IRQHandler(void)   //Event事件
 	if(USART_GetITStatus(USART2, USART_IT_RXNE) != RESET)  //接收中断
 	{
 			com_data= USART2->DR;
+		
+//		switch(receive_flag)
+//		{
+//			case initial_state:
+//				
+//		
+//	
+//		
+//		}
 	*(gps_timea_buff+data_gps_cnt++)= com_data;
 		//gps_shuzu[data_gps_cnt++]=com_data;
 	
 		if(zhengti_flag==1)
 		{
 		  zhengti_cnt++;
-			 if(zhengti_cnt==8)
+			 if(zhengti_cnt==10)
 				 {
-			    gps_write_data_flag=1;
+					 /*当收到\r\n后将其后的缓存区清零，防止上次接收的数据被意外记录*/
+					 for(;data_gps_cnt < EVENT_BUF_LEN;data_gps_cnt++)
+					 {
+						 *(gps_timea_buff+data_gps_cnt)= '\0';
+					 }
+			    
+					 gps_write_data_flag=1;
 					 zhengti_cnt=0;
 					 data_gps_cnt=0;
 					 zhengti_flag=0;
+						// *(gps_timea_buff+data_gps_cnt)= '\0';
 				 }
 		}	
 		else if( *(gps_timea_buff+data_gps_cnt-1)=='*')
@@ -143,7 +168,7 @@ void USART2_IRQHandler(void)   //Event事件
 		  if(data_gps_cnt>15)
 			{  
 				zhengti_flag=1;	
-			}
+			}  
 			else
 			data_gps_cnt=0;
 		  

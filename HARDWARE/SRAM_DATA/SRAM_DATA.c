@@ -45,7 +45,7 @@ u8 SRAM_DATA_Init(void)  //用户数据指针申请内存  返回0 成功   1失败
  //航拍点数据缓冲区内存分配
 	Write_Buff = mymalloc(80);
 	//保存文件名      航拍点时间文件   申请缓存
-		Write_Buff_gps = mymalloc(80);
+		Write_Buff_gps = mymalloc(EVENT_BUF_LEN);
 		Write_Buff_pos = mymalloc(80);
 	
 	//原始数据文件头

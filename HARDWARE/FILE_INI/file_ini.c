@@ -42,6 +42,7 @@ void NO_CONFIG_FILE_EXE(void)
 	Uart2_send_str((u8*)UB482_COM3_57600,strlen((const char *)UB482_COM3_57600));
 	delay_ms(1500);
 	Uart2_Init(57600);
+	USART_ITConfig(USART2, USART_IT_RXNE, DISABLE);//关闭串口二中断等待下面的5hz配置命令完成
 	
 	//Uart1_send_str((u8*)GPS_SAVE_CMM,strlen((const char *)GPS_230400));
 	Uart1_send_str((u8*)GPS_SAVE_CMM,strlen((const char *)GPS_SAVE_CMM));   //上面写错了改正至此

@@ -264,6 +264,8 @@ int main(void)
 	
   	USART1_RXD_DMA_Init();                        //串口1 DMA接收初始化
 	USART_Cmd(USART2, ENABLE);                    //开启串口
+	USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);//开启中断
+	
 	USART_Cmd(USART1, ENABLE);                    //开启串口
 	USART_Cmd(USART3, ENABLE);                    //开启串口
 	//ADD_HCN_HEAD();//添加HCN文件头

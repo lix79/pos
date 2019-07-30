@@ -10,13 +10,21 @@
 #define LED1_              GPIOB                  //
 #define LED1_PIN           GPIO_Pin_6
 
+#define LED2_              GPIOC                  //
+#define LED2_PIN           GPIO_Pin_0
+
+
+
 #define LED0_OUT(x)         x? GPIO_SetBits(LED0_ , LED0_PIN) : GPIO_ResetBits(LED0_ , LED0_PIN)
 
 #define LED1_OUT(x)         x? GPIO_SetBits(LED1_ , LED1_PIN) : GPIO_ResetBits(LED1_ , LED1_PIN)
 
+#define LED2_OUT(x)         x? GPIO_SetBits(LED2_ , LED2_PIN) : GPIO_ResetBits(LED2_ , LED2_PIN)
+
 
 #define LED0   PBout(5)		//	绿色    快门
 #define LED1   PBout(6)		//	蓝色    GPS数据写入SD卡       用于检测故障
+#define LED2   PCout(0)
 
 #define LED0_OFF   LED0 = 1
 #define LED0_ON    LED0 = 0
@@ -24,6 +32,9 @@
 
 #define LED1_OFF   LED1 = 1
 #define LED1_ON    LED1 = 0
+
+#define LED2_OFF   LED2 = 1
+#define LED2_ON    LED2 = 0
 
 void LED_Init(void);
 

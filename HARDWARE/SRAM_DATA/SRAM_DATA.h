@@ -9,6 +9,8 @@
 
 #define   GPS_ERR_MAX      ((u32)300000)      //GPS板卡故障阈值
 
+#define EVENT_BUF_LEN 120
+
 extern u8 *Folder_Name ;	               //保存文件夹名         保存用户数据文件夹明
 extern u8 *Moving_Station_File_Name ;	   //保存文件名    GPS数据文件
 extern u8 *Aerial_Point_File_Name ;	     //保存文件名      航拍点时间文件 
