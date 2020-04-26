@@ -63,7 +63,7 @@ int main(void)
 	SD_SACN_Init();               //SD卡插入检测
 	exfuns_init();		            //为fatfs相关变量申请内存
 	
-
+	Uart3_Init(115200);//给飞控报错用
 	
 	#ifdef rtk_error_test
 	Uart3_Init(115200);	//串口初始化，抢占优先级0，子优先级2
