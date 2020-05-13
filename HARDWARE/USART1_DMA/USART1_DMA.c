@@ -127,12 +127,14 @@ Prase_status receive_flag = initial_state;
 
 void USART2_IRQHandler(void)   //Event事件
 {
-	unsigned char com_data =0;
+	//unsigned char com_data =0;
 	//接收中断 (接收寄存器非空)----------------------------------------
 	if(USART_GetITStatus(USART2, USART_IT_RXNE) != RESET)  //接收中断
 	{
-			com_data= USART2->DR;
-		
+			//com_data= USART2->DR;
+
+            return ;
+/*		
 //		switch(receive_flag)
 //		{
 //			case initial_state:
@@ -141,7 +143,7 @@ void USART2_IRQHandler(void)   //Event事件
 //	
 //		
 //		}
-	*(gps_timea_buff+data_gps_cnt++)= com_data;
+	(*(gps_timea_buff+data_gps_cnt++))= com_data;
 		//gps_shuzu[data_gps_cnt++]=com_data;
 	
 		if(zhengti_flag==1)
@@ -149,10 +151,10 @@ void USART2_IRQHandler(void)   //Event事件
 		  zhengti_cnt++;
 			 if(zhengti_cnt==10)
 				 {
-					 /*当收到\r\n后将其后的缓存区清零，防止上次接收的数据被意外记录*/
+					 //当收到\r\n后将其后的缓存区清零，防止上次接收的数据被意外记录*
 					 for(;data_gps_cnt < EVENT_BUF_LEN;data_gps_cnt++)
 					 {
-						 *(gps_timea_buff+data_gps_cnt)= '\0';
+						 (*(gps_timea_buff+data_gps_cnt))= '\0';
 					 }
 			    
 					 gps_write_data_flag=1;
@@ -162,7 +164,7 @@ void USART2_IRQHandler(void)   //Event事件
 						// *(gps_timea_buff+data_gps_cnt)= '\0';
 				 }
 		}	
-		else if( *(gps_timea_buff+data_gps_cnt-1)=='*')
+		else if( (*(gps_timea_buff+data_gps_cnt-1))=='*')
 		//else if(gps_shuzu[data_gps_cnt-1]=='*')
 		{
 		  if(data_gps_cnt>15)
@@ -175,7 +177,7 @@ void USART2_IRQHandler(void)   //Event事件
 		}
 	
 //UTC时间校准任务------------------------------------------
- 
+ */
  }
 }
 
@@ -196,9 +198,9 @@ unsigned char start_cnt=0;
 unsigned char end_cnt=0;
 unsigned char RX_STATUS=RX_START;
 
-char longitude[8];
+//char longitude[8];
 double plongitude=0;
-char latitude[8];
+//char latitude[8];
 double platitude=0;
 char high[4];
 float phigh=0;
@@ -214,106 +216,104 @@ void USART3_IRQHandler(void)
 	unsigned char i=0;
 	//接收中断 (接收寄存器非空)----------------------------------------
 	if(USART_GetITStatus(USART3, USART_IT_RXNE) != RESET)  //接收中断
-	{
-			com_data= USART3->DR;
+	{    
+        com_data= USART3->DR;
 	     
-   switch (RX_STATUS)
-     {
-   case RX_START:
-        if (com_data == START_BYTE)//0x55 大写字符U
+        switch (RX_STATUS)
         {
-               start_cnt++;
-            if (start_cnt == 3)
+        case RX_START:
+            if (com_data == START_BYTE)//0x55 大写字符U
             {
-                RX_STATUS = RX_DATA;
-							  start_cnt=0;
-              //  RX_head_check_cnt_0 = 0;
-              //  RX_rear_check_cnt_0 = 0;
+                start_cnt++;
+                if (start_cnt == 3)
+                {
+                    RX_STATUS = RX_DATA;
+                    start_cnt=0;
+                    //RX_head_check_cnt_0 = 0;
+                    //RX_rear_check_cnt_0 = 0;
+                }
             }
-        }
-        else
-          start_cnt = 0;
-        break;
+            else
+            {
+              start_cnt = 0;
+            }
+            break;
 
-    case RX_DATA:
-      pos_shuzu[data_pos_cnt] = com_data;
+        case RX_DATA:
+            pos_shuzu[data_pos_cnt] = com_data;
             data_pos_cnt ++;
-		    if(data_pos_cnt==8)
-				{
-					for(i=0;i<8;i++)
-					{
-					longitude[i]=pos_shuzu[i];
-					}
-          plongitude=*(double*)&longitude;
-				}
-				else if(data_pos_cnt==16)
-				{
-				   for(i=0;i<8;i++)
-					{
-					latitude[i]=pos_shuzu[i+8];
-					}
-          platitude=*(double*)&latitude;
-				}
-				else if(data_pos_cnt==20)
-				{
-				  for(i=0;i<4;i++)
-					{
-					high[i]=pos_shuzu[i+16];
-					}
-          phigh=*(float*)&high;
-				
-				}
-				else if(data_pos_cnt==24)
-				{
-				  for(i=0;i<4;i++)
-					{
-					pitch[i]=pos_shuzu[i+20];
-					}
-          ppitch=*(float*)&pitch;
-				
-				}
-			  else if(data_pos_cnt==28)
-				{
-				  for(i=0;i<4;i++)
-					{
-					row[i]=pos_shuzu[i+24];
-					}
-          prow=*(float*)&row;
-				
-				}
-				 else if(data_pos_cnt==32)
-				{
-				  for(i=0;i<4;i++)
-					{
-					dirct[i]=pos_shuzu[i+28];
-					}
-           pdirct=*(float*)&dirct;
-				
-				}
-		   if(data_pos_cnt>RX_MAX)
-			 {
-			    data_pos_cnt=0;
-			    RX_STATUS=RX_START;
-			 }
-
-        if (com_data == END_BYTE)//0xF0
-        {
-              end_cnt++;
-            if (end_cnt == 3)
+            if(data_pos_cnt==8)
             {
-							 end_cnt=0;
-					
-               RX_STATUS=RX_START;
-               data_pos_cnt=0;
-							pos_jilu_flag=1;	
-          
+                for(i=0;i<8;i++)
+                {
+                    ((char *)&platitude)[i] = pos_shuzu[i];
+                }
             }
-        }
-        else
-        end_cnt = 0;
+            else if(data_pos_cnt==16)
+            {
+                for(i=0;i<8;i++)
+                {
+                    ((char *)&plongitude)[i] = pos_shuzu[i+8];
+                }
+            }
+            else if(data_pos_cnt==20)
+            {
+                for(i=0;i<4;i++)
+                {
+                    high[i]=pos_shuzu[i+16];
+                }
+                phigh=*(float*)&high;
+            }
+            else if(data_pos_cnt==24)
+            {
+                for(i=0;i<4;i++)
+                {
+                    pitch[i]=pos_shuzu[i+20];
+                }
+                ppitch=*(float*)&pitch;
+            }
+            else if(data_pos_cnt==28)
+            {
+                for(i=0;i<4;i++)
+                {
+                    row[i]=pos_shuzu[i+24];
+                }
+                prow=*(float*)&row;
+            }
+            else if(data_pos_cnt==32)
+            {
+                for(i=0;i<4;i++)
+                {
+                    dirct[i]=pos_shuzu[i+28];
+                }
+                pdirct=*(float*)&dirct;
+            }
+            
+            if(data_pos_cnt>RX_MAX)
+            {
+                data_pos_cnt=0;
+                RX_STATUS=RX_START;
+            }
 
-        break;
-    }
+            if (com_data == END_BYTE)//0xF0
+            {
+                end_cnt++;
+                if (end_cnt == 3)
+                {
+                    end_cnt=0;
+
+                    RX_STATUS=RX_START;
+                    data_pos_cnt=0;
+                    pos_jilu_flag=1;	
+                }
+            }
+            else
+            {
+                end_cnt = 0;
+            }
+
+            break;
+        }
    }
 }
 

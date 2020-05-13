@@ -93,8 +93,15 @@ void PLAY_DATE_TASK(void)      //显示需显示数据   有变化才刷新
 	{
 	  if(PLAY_DATE.Write_Counter_CAMM!=Write_Counter_CAMM)   //拍照数
 	  {
-	   PLAY_DATE.Write_Counter_CAMM = Write_Counter_CAMM;   //备份
-		 OLED_ShowNum(32,16,Write_Counter_CAMM,4,16,1);  //写入  	 
+
+        static char WriteCounterCAMMBuff[16] = "";
+	    PLAY_DATE.Write_Counter_CAMM = Write_Counter_CAMM;   //备份
+        OLED_ShowNum(32,16,Write_Counter_CAMM,4,16,1);  //写入  	
+        sprintf((char *)WriteCounterCAMMBuff,"%d\r\n",PLAY_DATE.Write_Counter_CAMM);
+        SD_Res_STA=f_open(ftemp, (const TCHAR*)Camera_Count_File_Name, FA_OPEN_ALWAYS | FA_WRITE); 	//打开文件  		
+        //SD_Res_STA=f_lseek(ftemp,ftemp ->fsize); //移动指针到结尾
+        SD_Res_STA = f_write(ftemp,WriteCounterCAMMBuff,strlen((char *)WriteCounterCAMMBuff),&br);			 //写入文件
+        SD_Res_STA=f_close(ftemp);   
 	  }	
 	}		
  }	

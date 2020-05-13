@@ -17,6 +17,7 @@ void NO_CONFIG_FILE_EXE(void)  ;
 void Wait_Satellite_Broadcast(void) ; //µÈ´ýÎÀÐÇ¹ã²¥
 
 
+extern void Write_Log(char *log_str);
 
 
 

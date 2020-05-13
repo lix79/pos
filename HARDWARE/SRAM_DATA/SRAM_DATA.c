@@ -13,7 +13,10 @@
 u8 *Folder_Name = 0;	                          //保存文件夹名    保存用户数据文件夹名字
 u8 *Moving_Station_File_Name = 0;	              //保存文件名      GPS数据文件
 u8 *Aerial_Point_File_Name = 0;	                //保存文件名      航拍点时间文件 
-u8 *Gps_Point_File_Name = 0;	                //保存文件名      航拍点时间文件 
+//u8 *Gps_Point_File_Name = 0;	                //保存文件名      航拍点时间文件 
+u8 *Camera_Count_File_Name = 0;	                //保存文件名      拍照次数（Event事件个数）文件 
+
+
 u8 *Pos_Point_File_Name = 0;	                //保存文件名      航拍点时间文件 
 u8 *Write_Buff = 0;                           	//航拍点写书数据缓冲区
 u8 *Write_Buff_gps = 0;                           	//航拍点写书数据缓冲区
@@ -39,6 +42,13 @@ u8  *RX_DMA_BUFF1  ;
 u8   RX_DMA_STA = 0; 
 //---------------------------------------------------------------------------
 
+
+extern const u8 *FILE_OPERATION_ERROR;  //文件操作有失败
+
+void Uart3_send_str(u8 * buf,u16 len);
+
+
+
 u8 SRAM_DATA_Init(void)  //用户数据指针申请内存  返回0 成功   1失败
 {
  //指针缓存申请-----------------------------------------------------------------
@@ -53,7 +63,9 @@ u8 SRAM_DATA_Init(void)  //用户数据指针申请内存  返回0 成功   1失败
 	
 	//保存文件名      航拍点时间文件   申请缓存
 	Aerial_Point_File_Name = mymalloc(FIL_NAME_LEN);   
-		Gps_Point_File_Name = mymalloc(FIL_NAME_LEN);  
+		//Gps_Point_File_Name = mymalloc(FIL_NAME_LEN); 
+        Camera_Count_File_Name = mymalloc(FIL_NAME_LEN); 
+        
 	Pos_Point_File_Name = mymalloc(FIL_NAME_LEN);   	
  //申请40个字节内存,类似"0:TEXT/TEXT20120321210633.txt"sprintf用到的缓冲区需要四个字节对齐
 	Moving_Station_File_Name = mymalloc(FIL_NAME_LEN);
@@ -70,7 +82,7 @@ u8 SRAM_DATA_Init(void)  //用户数据指针申请内存  返回0 成功   1失败
  //保存文件夹名         保存用户数据文件夹名  申请缓存
 	Folder_Name = mymalloc(FIL_NAME_LEN);
 
-	if((Write_Buff==0)||(Aerial_Point_File_Name==0)||(Gps_Point_File_Name==0)||(Pos_Point_File_Name==0)||(Moving_Station_File_Name==0)||(RX_BUF_FIFO==0)||(GPS_BUF==0)||(Folder_Name==0))   //只要有一个申请失败 就错误
+	if((Write_Buff==0)||(Aerial_Point_File_Name==0)||(Camera_Count_File_Name==0)||(Pos_Point_File_Name==0)||(Moving_Station_File_Name==0)||(RX_BUF_FIFO==0)||(GPS_BUF==0)||(Folder_Name==0))   //只要有一个申请失败 就错误
 	{
 	   return 1;
 	}
@@ -100,30 +112,46 @@ u8 SYS_START_Init(void)   //系统开始运行时 内存申请  返回 0 成功  1失败
 	return 0;
 }
 
+
 void SYS_Scan_TF_Err(void)   //TF 操作错误检测
 {
 // if((SD_Res_STA!=FR_OK)||(SD_SACN==1))  //有文件操作失败
-	if((SD_Res_STA!=FR_OK))  //有文件操作失败
- {
-	LED0=1;
-	LED1=0;
-	Movie_Show_Img(SD_ERR);   //故障图标显示
-	OLED_Gram_Update();    //显示	
-	while(1)
-	{
-//	 if(SD_SACN==0)   //SD卡插入
-//	 {
-//		 delay_ms(1500);
-//		 if(SD_SACN==0)
-//		 {
-			Sys_Soft_Reset();  //系统软件复位		
-//		 }	
-//	 }
-	  delay_ms(300);
-	  OLED_Gram_Inverse();   //显存反色 显示	
-	  LED0=!LED0;
-	  LED1=!LED1;	
-	 }
-  }
+    if((SD_Res_STA!=FR_OK))  //有文件操作失败
+    {
+        int count = 0;
+    	LED0=1;
+    	LED1=0;
+    	Movie_Show_Img(SD_ERR);   //故障图标显示
+    	OLED_Gram_Update();    //显示	
+    	while(1)
+    	{
+    //	 if(SD_SACN==0)   //SD卡插入
+    //	 {
+    //		 delay_ms(1500);
+    //		 if(SD_SACN==0)
+    //		 {
+                //杩欓噷娣诲姞涓轰簡鍑洪敊鍓嶇粰鍑洪敊璇彁绀?
+                Uart3_send_str((u8*)FILE_OPERATION_ERROR,strlen((const char *)FILE_OPERATION_ERROR));//error_02检测不到SD卡  给飞控发消息
+                delay_ms(500);
+    			Sys_Soft_Reset();  //系统软件复位		
+    //		 }	
+    //	 }
+
+
+            delay_ms(1000);
+            OLED_Gram_Inverse();   //显存反色 显示	
+            LED0=!LED0;
+            LED1=!LED1;	
+            LED2 = !LED2;
+
+            if(count <= 0)
+            {
+                count = 60;
+                Uart3_send_str((u8*)FILE_OPERATION_ERROR,strlen((const char *)FILE_OPERATION_ERROR));//error_02检测不到SD卡  给飞控发消息
+            }
+
+            count--;
+    	 }
+      }
 }
 

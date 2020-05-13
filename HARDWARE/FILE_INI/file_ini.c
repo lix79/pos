@@ -16,9 +16,15 @@
 
 #define   FILE_BUF_MAX            20         //文件读缓存大小
 #define   GPS_JUST_Nuber          5          //GPS校准次数  再赋值RTC
-#define   GPS_CONFIG_Nuber_Size   10         //GPS上电配置次数
+#define   GPS_CONFIG_Nuber_Size   2         //GPS上电配置次数
 const u8 *GPS_230400           =  "CONFIG COM1 230400\r\n" ;
 const u8 *UB482_COM3_57600           =  "CONFIG COM3 57600\r\n" ;
+
+extern const u8 *GPS_ULONG_FAILED;  //gps ulong error
+extern const u8 *GPS_CONFIGURE_FAILED;  //gps 5hz指令失败
+
+void Uart3_send_str(u8 * buf,u16 len);
+
 
 void NO_CONFIG_FILE_EXE(void) 
 {
@@ -29,21 +35,26 @@ void NO_CONFIG_FILE_EXE(void)
 	OLED_ShowNum(48,16,baud,6,16,1);	//显示串口波特率  显示
 	delay_ms(1500);
 
+
 	Uart1_Init(115200);
 	Uart1_send_str((u8*)GPS_230400,strlen((const char *)GPS_230400));
 	delay_ms(1500);
 	Uart1_send_str((u8*)GPS_230400,strlen((const char *)GPS_230400));
 	delay_ms(1500);
 	Uart1_Init(baud);
+
 	
 	Uart2_Init(115200);//板卡默认波特率115200
+	
 	Uart2_send_str((u8*)UB482_COM3_57600,strlen((const char *)UB482_COM3_57600));
+
 	delay_ms(1500);
 	Uart2_send_str((u8*)UB482_COM3_57600,strlen((const char *)UB482_COM3_57600));
+
 	delay_ms(1500);
 	Uart2_Init(57600);
 	USART_ITConfig(USART2, USART_IT_RXNE, DISABLE);//关闭串口二中断等待下面的5hz配置命令完成
-	
+
 	//Uart1_send_str((u8*)GPS_SAVE_CMM,strlen((const char *)GPS_230400));
 	Uart1_send_str((u8*)GPS_SAVE_CMM,strlen((const char *)GPS_SAVE_CMM));   //上面写错了改正至此
 	
@@ -51,27 +62,42 @@ void NO_CONFIG_FILE_EXE(void)
 	delay_ms(1500);
 	
   Uart1_Init(baud);	//串口初始化，抢占优先级3，子优先级3
-	
+  
+	Write_Log("Gps config.\r\n");
+    delay_ms(300);
 	//Uart2_Init(115200);	//串口初始化，抢占优先级3，子优先级3
-	
 //等待GPS板卡响应unlog指令-----------------------------------
 	while(GPS_CONFIG_TIMEA()&&(res<=GPS_CONFIG_Nuber_Size))  //配置GPS关闭所有输出  并配置板卡输出ZDA消息  最多等待 5*12S
 	{
 		SYS_Scan_TF_Err();  //TF 卡检测
-	  res ++;
+        res ++;
 		delay_ms(100);
 	}
 	
-  if(res>=GPS_CONFIG_Nuber_Size)
+    if(res>=GPS_CONFIG_Nuber_Size)
 	{
+        int count = 0;
 		Movie_Show_Img(GPS_ERR);    //显示错误界面
-	  LED0 = 1;                   //熄灭
+        LED0 = 1;                   //熄灭
+        Write_Log("Gps Config1 failed!!!\r\n");
 		while(1)
 		{
-		  LED1 =! LED1; 	//初始化失败，LED闪烁提示
-		 delay_ms(300);
+		  LED1 = !LED1; 	//初始化失败，LED闪烁提示
+		  LED2 = !LED2;
+		  delay_ms(1000);
+          
+          if(count <= 0)
+          {
+              count = 60;
+              Uart3_send_str((u8*)GPS_ULONG_FAILED,strlen((const char *)GPS_ULONG_FAILED));
+          }
+
+          count--;
+
 		}
 	}
+    Write_Log("Gps config1 sucess.\r\n");
+    delay_ms(300);
 
 //-------------------------------------------------------------
 //开始校准RTC  获取 GPS时间数据 -------------------------------
@@ -106,25 +132,42 @@ void NO_CONFIG_FILE_EXE(void)
 	}
 //RTC上电时间第一次数据分析时间数据校准完成   GPS定位完成-------------------------------------------------------------	
 	 
-	
+	Write_Log("Calibration Rtc complete.\r\n");
+    delay_ms(300);
 //检测是否已经收到广播----------------------------------------------------------	
   if(Satellite_Broadcast_Reg != Satellite_Broadcast_FLAT)    //如果没有收到卫星广播   则要等待广播
 	{
 	  Wait_Satellite_Broadcast();   //等待卫星广播命令
 	}
+  
+    Write_Log("Satellite_Broadcast complete.\r\n");
+    delay_ms(300);
 	
 //上电第一次RTC时间GPS时间数据校准结束-------------------------------------------------------
 
 	if( GPS_CONFIG_5HZ() != 0 ) 	 //配置GPS    如果配置失败
 	{
+        int count = 0;
 		Movie_Show_Img(GPS_ERR);    //显示错误界面
-	  LED0 = 1;                      //熄灭
+        LED0 = 1;                      //熄灭
+        Write_Log("Gps config2 failed!!!\r\n");
 		while(1)
 		{
-		  LED1 =! LED1; 	//初始化失败，LED闪烁提示
-		  delay_ms(300);
+            LED1 = !LED1; 	//初始化失败，LED闪烁提示
+            LED2 = !LED2;
+            delay_ms(1000);
+          
+            if(count <= 0)
+            {
+                count = 60;
+                Uart3_send_str((u8*)GPS_CONFIGURE_FAILED,strlen((const char *)GPS_CONFIGURE_FAILED));
+            }
+
+            count--;
 		}
 	}
+    Write_Log("Gps config2 sucess.\r\n");
+    delay_ms(300);
 //GPS板卡配置完成---------------------------------------------------------
 }
 

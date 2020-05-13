@@ -14,7 +14,10 @@
 extern u8 *Folder_Name ;	               //保存文件夹名         保存用户数据文件夹明
 extern u8 *Moving_Station_File_Name ;	   //保存文件名    GPS数据文件
 extern u8 *Aerial_Point_File_Name ;	     //保存文件名      航拍点时间文件 
-extern u8 *Gps_Point_File_Name ;	     //保存文件名      航拍点时间文件 
+//extern u8 *Gps_Point_File_Name ;	     //保存文件名      航拍点时间文件 
+extern u8 *Camera_Count_File_Name;	     //保存文件名      拍照次数（Event事件个数）文件
+
+
 extern u8 *Pos_Point_File_Name ;	     //保存文件名      航拍点时间文件 
 extern u8 *Write_Buff ;	                 //航拍点写书数据缓冲区
 extern u8 *Write_Buff_gps ;	                 //航拍点写书数据缓冲区
